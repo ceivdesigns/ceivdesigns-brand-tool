@@ -1053,7 +1053,7 @@ input[type="file"] { display: none; }
         <li><a href="#">Work</a></li>
         <li><a href="#">Blog</a></li>
       </ul>
-      <a href="https://wwww.ceivdesigns.com" class="mock-nav-cta">Get in Touch</a>
+      <a href="https://wwww.ceivdesigns.com" target="_blank" class="mock-nav-cta">Get in Touch</a>
     </nav>
 
     <!-- HERO -->
@@ -1421,17 +1421,18 @@ function rgbToHsv(r,g,b) {
 function applyVar(prop, val) {
   if (!prop) return;
   document.documentElement.style.setProperty(prop, val);
-  // Force Safari to repaint elements using CSS custom properties
-  // Safari sometimes doesn't invalidate computed styles on setProperty
+  // Force Safari to repaint — Safari sometimes doesn't invalidate on setProperty
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  if (isSafari) {
-    const mockPage = document.getElementById('mockPage');
-    if (mockPage) {
-      mockPage.style.display = 'none';
-      // eslint-disable-next-line no-unused-expressions
-      mockPage.offsetHeight; // trigger reflow
-      mockPage.style.display = '';
-    }
+  const mockPage = document.getElementById('mockPage');
+  if (isSafari && mockPage) {
+    mockPage.style.display = 'none';
+    mockPage.offsetHeight; // trigger reflow
+    mockPage.style.display = '';
+  }
+  // Re-sync mobile clone if in mobile view
+  const wrap = document.getElementById('mockupWrap');
+  if (wrap && wrap.classList.contains('mobile-view')) {
+    setTimeout(() => setViewport('mobile'), 30);
   }
 }
 
@@ -1953,19 +1954,7 @@ function pickHueTouch(e) { const t=e.touches[0]; pickHue(t); }
     }
   }
 
-  // Keep mobile clone in sync when colours/fonts change
-  const _origSetProp = document.documentElement.style.setProperty.bind(document.documentElement.style);
-  // We hook into applyVar instead — it already triggers re-render
-  // After applyVar runs, if mobile mode is active, re-sync the clone
-  const __prevApplyVar = applyVar;
-  function applyVar(prop, val) {
-    __prevApplyVar(prop, val);
-    const wrap = document.getElementById('mockupWrap');
-    if (wrap && wrap.classList.contains('mobile-view')) {
-      // small delay so CSS vars have propagated
-      setTimeout(() => setViewport('mobile'), 30);
-    }
-  }
+  // Mobile clone re-sync is handled inside applyVar directly (see above)
 
 
 </script>
